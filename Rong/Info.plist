@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>Rong</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+
+    <!-- Required for Input Method Kit -->
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+
+    <!-- IMKit connection name: must match what IMKServer is initialized with -->
+    <key>InputMethodConnectionName</key>
+    <string>com.loganwang.inputmethod.Rong_Connection</string>
+
+    <!-- Class that handles input: must be @objc(RongInputController) -->
+    <key>InputMethodServerControllerClass</key>
+    <string>RongInputController</string>
+
+    <!-- Run in background (no Dock icon) -->
+    <key>LSBackgroundOnly</key>
+    <true/>
+
+    <!-- Supported scripts — Hans = Simplified Chinese -->
+    <key>tsInputMethodCharacterRepertoireKey</key>
+    <array>
+        <string>Hans</string>
+    </array>
+
+    <!-- Input mode dictionary: macOS uses tsInputMethodModes to list IME in the menu bar switcher -->
+    <key>ComponentInputModeDict</key>
+    <dict>
+        <key>tsInputMethodModes</key>
+        <dict>
+            <key>com.loganwang.inputmethod.Rong.Hans</key>
+            <dict>
+                <key>TISIntendedLanguage</key>
+                <string>zh-Hans</string>
+                <key>tsInputMethodCharacterRepertoireKey</key>
+                <array>
+                    <string>Hans</string>
+                </array>
+                <key>TISIconIsTemplate</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
+
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2026 Logan Wang. All rights reserved.</string>
+</dict>
+</plist>
