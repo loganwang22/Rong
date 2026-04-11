@@ -17,6 +17,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSLog("Rong IME started")
 
+        // Warm the dictionary off the main thread so the first keystroke
+        // doesn't pay the cost of parsing ~125k bundled-dict lines.
+        DispatchQueue.global(qos: .userInitiated).async {
+            _ = PinyinDictionary.shared
+        }
+
         // Preload LLM model in the background
         Task {
             await LLMEngine.shared.preload()

@@ -55,11 +55,20 @@ nonisolated final class PinyinDictionary {
 
     private func loadBundledDict() {
         // Try to load pre-built rong.dict from bundle Resources
-        guard let url = Bundle.main.url(forResource: "rong", withExtension: "dict") else { return }
+        guard let url = Bundle.main.url(forResource: "rong", withExtension: "dict") else {
+            NSLog("Rong: rong.dict not bundled — running on built-in seed table only (\(table.count) keys)")
+            return
+        }
         guard let data = try? Data(contentsOf: url) else { return }
-        // Simple binary format: line-based text for now
         // Line format: "syllables\tcharacter\tscore\n"
         guard let text = String(data: data, encoding: .utf8) else { return }
+
+        // Remember which keys the bundled dict touched so we only re-sort those
+        // buckets. Bundled entries append to the existing table; the built-in
+        // scores are hand-tuned and intentionally outrank the CC-CEDICT
+        // heuristic scores, so a merge-then-sort is the right behavior.
+        var touchedKeys = Set<String>()
+        var lineCount = 0
         for line in text.split(separator: "\n") {
             let parts = line.split(separator: "\t")
             guard parts.count >= 3 else { continue }
@@ -67,8 +76,19 @@ nonisolated final class PinyinDictionary {
             let char = String(parts[1])
             let score = Double(parts[2]) ?? 1.0
             table[key, default: []].append((text: char, score: score))
+            touchedKeys.insert(key)
+            lineCount += 1
         }
-        NSLog("Rong: Loaded bundled dict, \(table.count) entries")
+
+        // Re-sort every bucket the bundled dict touched; without this, built-in
+        // high-frequency entries (sorted in loadBuiltIn) end up ahead of newly
+        // appended lower-scored entries within the same array segment but the
+        // segments themselves are not interleaved — ranking breaks silently.
+        for key in touchedKeys {
+            table[key]?.sort { $0.score > $1.score }
+        }
+
+        NSLog("Rong: Loaded bundled dict — \(lineCount) lines merged, \(table.count) total keys")
     }
 
     // MARK: - Built-in seed table

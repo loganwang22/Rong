@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Xcode user state
+Rong.xcodeproj/xcuserdata/
+Rong.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Build artifacts
+build/
+DerivedData/
+
+# Generated dictionary — regenerate with `scripts/build-dict.sh`
+Rong/rong.dict
+
+# LLM model weights — fetch instructions in Rong/Models/README.md
+Rong/Models/*.gguf

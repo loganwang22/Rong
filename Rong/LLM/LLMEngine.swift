@@ -4,11 +4,21 @@ import Foundation
 /// Currently a stub — returns nil/passthrough until llama.cpp is integrated.
 ///
 /// To activate LLM support:
-/// 1. Add a working llama.cpp SPM package to the Xcode project
-/// 2. `import llama` and replace the stub methods with real inference
-/// 3. Place qwen2.5-0.5b-instruct-q4_k_m.gguf in Resources/Models/
+/// 1. Drop a `.gguf` file into `Rong/Models/` (see the README there for a fetch
+///    script). The file-system synchronized group will auto-include it in the
+///    bundle's Resources on the next build.
+/// 2. Add a working llama.cpp SPM package to the Xcode project
+/// 3. `import llama` and replace the stub methods with real inference
 actor LLMEngine {
     static let shared = LLMEngine()
+
+    /// Model basenames (no extension) the engine will try to load, in priority order.
+    /// Add entries here when you want to support alternative quantizations.
+    private static let candidateModelNames: [String] = [
+        "qwen2.5-0.5b-instruct-q4_k_m",
+        "qwen2.5-0.5b-instruct-q5_k_m",
+        "qwen2.5-0.5b-instruct-q8_0",
+    ]
 
     private(set) var isLoaded = false
     private var isLoading = false
@@ -26,13 +36,19 @@ actor LLMEngine {
         guard !isLoaded, !isLoading else { return }
         isLoading = true
 
-        let modelName = "qwen2.5-0.5b-instruct-q4_k_m"
-        guard let modelURL = Bundle.main.url(
-            forResource: modelName,
-            withExtension: "gguf",
-            subdirectory: "Models"
-        ) else {
-            NSLog("Rong: LLM model '\(modelName).gguf' not found in bundle Resources/Models/ — running dictionary-only")
+        // Search the bundle root — the file-system synchronized group flattens
+        // `Rong/Models/foo.gguf` into the bundle's Resources root, so no
+        // `subdirectory:` argument is needed.
+        var found: URL?
+        for name in Self.candidateModelNames {
+            if let url = Bundle.main.url(forResource: name, withExtension: "gguf") {
+                found = url
+                break
+            }
+        }
+
+        guard let modelURL = found else {
+            NSLog("Rong: No LLM .gguf found in bundle (looked for \(Self.candidateModelNames.map { "\($0).gguf" }.joined(separator: ", "))) — running dictionary-only")
             isLoading = false
             return
         }
